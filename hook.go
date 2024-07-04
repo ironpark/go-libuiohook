@@ -66,7 +66,9 @@ func SetDispatchProc(f func(event *Event)) {
 }
 
 // Start Insert the event hook.
-func Start(ctx context.Context) int {
+func Start(ctx context.Context) error {
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
 	go func(ctx context.Context) {
 		for {
 			select {
@@ -84,12 +86,15 @@ func Start(ctx context.Context) int {
 		}
 	}(ctx)
 	res := int(C.hook_run())
+	cancel()
 	// Drain the event channel
 	for {
 		select {
 		case <-evCh:
 		default:
-			return res
+			if res != C.UIOHOOK_SUCCESS {
+				return getError(res)
+			}
 		}
 	}
 }
