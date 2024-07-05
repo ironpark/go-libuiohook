@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package proto;
+option go_package = "github.com/ironpark/go-libuiohook/proto";
+
+
+message KeyData {
+    uint32 key_code = 2;
+    uint32 raw_code = 3;
+    uint32 key_char = 4;
+}
+
+message MouseData {
+    uint32 button = 2;
+    uint32 clicks = 3;
+    int32 x = 4;
+    int32 y = 5;
+}
+
+message WheelData {
+    uint32 type = 1;
+    uint32 clicks = 2;
+    int32 x = 3;
+    int32 y = 4;
+    uint32 amount = 5;
+    int32 rotation = 6;
+    uint32 direction = 7;
+}
+
+message Msg {
+    uint32 type = 1;
+    uint64 time = 2;
+    uint32 mask = 3;
+    uint32 reserved = 4;
+    oneof data {
+        KeyData key = 5;
+        MouseData mouse = 6;
+        WheelData wheel = 7;
+    }
+}
+
