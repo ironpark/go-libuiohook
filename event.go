@@ -2,52 +2,6 @@ package go_libuiohook
 
 /*
 #include "uiohook.h"
-
-// keyboard event data
-uint16_t get_keycode(uiohook_event* const event) {
-	return event->data.keyboard.keycode;
-}
-uint16_t get_rawcode(uiohook_event* const event) {
-	return event->data.keyboard.rawcode;
-}
-uint16_t get_keychar(uiohook_event* const event) {
-	return event->data.keyboard.keychar;
-}
-// mouse event data
-uint16_t get_mouse_button(uiohook_event* const event) {
-	return event->data.mouse.button;
-}
-uint16_t get_mouse_clicks(uiohook_event* const event) {
-	return event->data.mouse.clicks;
-}
-int16_t get_mouse_x(uiohook_event* const event) {
-	return event->data.mouse.x;
-}
-int16_t get_mouse_y(uiohook_event* const event) {
-	return event->data.mouse.y;
-}
-// mouse wheel event data
-uint16_t get_wheel_clicks(uiohook_event* const event) {
-	return event->data.wheel.clicks;
-}
-int16_t get_wheel_x(uiohook_event* const event) {
-	return event->data.wheel.x;
-}
-int16_t get_wheel_y(uiohook_event* const event) {
-	return event->data.wheel.y;
-}
-uint8_t get_wheel_type(uiohook_event* const event) {
-	return event->data.wheel.type;
-}
-uint16_t get_wheel_amount(uiohook_event* const event) {
-	return event->data.wheel.amount;
-}
-int16_t get_wheel_rotation(uiohook_event* const event) {
-	return event->data.wheel.rotation;
-}
-uint8_t get_wheel_direction(uiohook_event* const event) {
-	return event->data.wheel.direction;
-}
 */
 import "C"
 import (
@@ -201,33 +155,4 @@ func (e *Event) cvtC() (ev *C.uiohook_event) {
 		*(*C.mouse_wheel_event_data)(unsafe.Pointer(&ev.data)) = wheel
 	}
 	return
-}
-
-func cvtEvent(event *C.uiohook_event) *Event {
-	e := &Event{
-		Type:     EventType(event._type),
-		Time:     time.Unix(0, int64(event.time)*int64(time.Microsecond)),
-		Mask:     uint16(event.mask),
-		Reserved: uint16(event.reserved),
-	}
-	switch e.Type {
-	case EvKeyTyped, EvKeyPressed, EvKeyReleased:
-		e.Data.KeyCode = uint16(C.get_keycode(event))
-		e.Data.RawCode = uint16(C.get_rawcode(event))
-		e.Data.KeyChar = uint16(C.get_keychar(event))
-	case EvMouseClicked, EvMousePressed, EvMouseReleased, EvMouseMoved, EvMouseDragged:
-		e.Data.Button = uint16(C.get_mouse_button(event))
-		e.Data.Clicks = uint16(C.get_mouse_clicks(event))
-		e.Data.X = int16(C.get_mouse_x(event))
-		e.Data.Y = int16(C.get_mouse_y(event))
-	case EvMouseWheel:
-		e.Data.Clicks = uint16(C.get_wheel_clicks(event))
-		e.Data.X = int16(C.get_wheel_x(event))
-		e.Data.Y = int16(C.get_wheel_y(event))
-		e.Data.WheelType = uint8(C.get_wheel_type(event))
-		e.Data.Amount = uint16(C.get_wheel_amount(event))
-		e.Data.Rotation = int16(C.get_wheel_rotation(event))
-		e.Data.Direction = uint8(C.get_wheel_direction(event))
-	}
-	return e
 }
