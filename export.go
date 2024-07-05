@@ -6,10 +6,10 @@ package go_libuiohook
 import "C"
 
 var (
-	evCh = make(chan *Event, 1024)
+	evCh = make(chan *C.uiohook_event, 1024)
 )
 
 //export goDispatchProc
 func goDispatchProc(event *C.uiohook_event) {
-	evCh <- cvtEvent(event)
+	evCh <- event
 }

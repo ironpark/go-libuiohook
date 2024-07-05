@@ -20,20 +20,30 @@ import (
 #include "uiohook.h"
 
 #ifndef UIOHOOK_SHARED
+#ifndef __UIOHOOK_INTERNAL_H__
+#define __UIOHOOK_INTERNAL_H__
 #include "logger.c"
 #include "input_helper.c"
 #include "input_hook.c"
 #include "post_event.c"
 #include "system_properties.c"
 #endif
+#endif
 
-void goDispatchProc(uiohook_event* const event);
-
-void registerDispatchProc() {
-	hook_set_dispatch_proc(&goDispatchProc);
+extern void goDispatchProc(uiohook_event* const event);
+static void __internel_dispatch(uiohook_event* const event) {
+	//clone the event
+	uiohook_event* clone = (uiohook_event*)malloc(sizeof(uiohook_event));
+	if (clone == NULL) {
+		return;
+	}
+	memcpy(clone, event, sizeof(uiohook_event));
+	goDispatchProc(clone);
 }
 
-
+void registerDispatchProc() {
+	hook_set_dispatch_proc(&__internel_dispatch);
+}
 */
 import "C"
 
@@ -74,7 +84,8 @@ func Start(ctx context.Context) error {
 			select {
 			case ev := <-evCh:
 				lock.RLock()
-				dispatchProc(ev)
+				dispatchProc(cvtEvent(ev))
+				C.free(unsafe.Pointer(ev))
 				lock.RUnlock()
 			case <-ctx.Done():
 				for C.hook_stop() != C.UIOHOOK_SUCCESS {
@@ -95,6 +106,7 @@ func Start(ctx context.Context) error {
 			if res != C.UIOHOOK_SUCCESS {
 				return getError(res)
 			}
+			return nil
 		}
 	}
 }
